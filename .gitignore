@@ -1,0 +1,60 @@
+# Gradle files
+*.iml
+.gradle
+.gradle/
+/local.properties
+local.properties
+
+# IDE files
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/dictionaries
+/.idea/gradle.xml
+/.idea/misc.xml
+/.idea/jarRepositories.xml
+/.idea/compiler.xml
+/.idea/.name
+/.idea/vcs.xml
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+/build
+/app/build
+/app/release
+/app/debug
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Logs and crash reports
+*.log
+/captures
+output.json
+
+# Native build files
+.externalNativeBuild
+.cxx
+
+# Generated files
+bin/
+gen/
+out/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services
+google-services.json
+
+# Backup files
+*.bak
+*.tmp

@@ -1,0 +1,21 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "RacingDrama"
+include ':app'
+// Comment out the pygame_sdl2 module until properly configured
+// include ':pygame_sdl2'
+// project(':pygame_sdl2').projectDir = new File('pygame-android/pygame_sdl2')

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Game asset IDs for referencing in code -->
+    <item name="bike_normal_id" type="id" />
+    <item name="bike_wheelie_id" type="id" />
+    <item name="bike_jump_id" type="id" />
+    <item name="car_id" type="id" />
+    <item name="rock_id" type="id" />
+    <item name="oil_id" type="id" />
+    <item name="cone_id" type="id" />
+    <item name="background_id" type="id" />
+    <item name="finish_line_id" type="id" />
+    <item name="speed_lines_id" type="id" />
+    <item name="dust_id" type="id" />
+    <item name="crash_id" type="id" />
+    <item name="stunt_stars_id" type="id" />
+</resources>

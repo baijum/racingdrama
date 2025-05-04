@@ -1,0 +1,659 @@
+package com.racingdrama;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class GameView extends SurfaceView implements SurfaceHolder.Callback {
+    // Game thread
+    private GameThread gameThread;
+    
+    // Screen dimensions
+    private int screenWidth;
+    private int screenHeight;
+    
+    // Game state
+    private boolean isPlaying = false;
+    private boolean gameOver = false;
+    private boolean gameWon = false;
+    
+    // Game objects
+    private Player player;
+    private List<Obstacle> obstacles;
+    private int score = 0;
+    private int distance = 0;
+    private int finishLineY = -5000; // Finish line position (negative means it's ahead)
+    private int roadY = 0;
+    private int roadSpeed = 5;
+    
+    // Effect timers
+    private boolean showCrashEffect = false;
+    private int crashEffectTimer = 0;
+    private int crashEffectX = 0;
+    private int crashEffectY = 0;
+    private String stuntBonusText = null;
+    private int stuntBonusTimer = 0;
+    
+    // Touch controls
+    private TouchButton leftButton;
+    private TouchButton rightButton;
+    private TouchButton upButton;
+    private TouchButton downButton;
+    private TouchButton wheelieButton;
+    private TouchButton jumpButton;
+    private TouchButton restartButton;
+    
+    // Touch input state
+    private String touchDirection = null;
+    private String touchStunt = null;
+    
+    // Game assets
+    private Bitmap bikeNormalImg;
+    private Bitmap bikeWheelieImg;
+    private Bitmap bikeJumpImg;
+    private Bitmap carImg;
+    private Bitmap rockImg;
+    private Bitmap oilImg;
+    private Bitmap coneImg;
+    private Bitmap backgroundImg;
+    private Bitmap finishLineImg;
+    private Bitmap speedLinesImg;
+    private Bitmap dustImg;
+    private Bitmap crashImg;
+    private Bitmap stuntStarsImg;
+    
+    // Paint objects for drawing
+    private Paint textPaint;
+    private Paint scorePaint;
+    private Paint gameOverPaint;
+    
+    // Random generator
+    private Random random;
+    
+    public GameView(Context context, int screenWidth, int screenHeight) {
+        super(context);
+        
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+        
+        // Get the holder and add callback
+        SurfaceHolder holder = getHolder();
+        holder.addCallback(this);
+        
+        // Initialize random generator
+        random = new Random();
+        
+        // Initialize paint objects
+        initPaints();
+        
+        // Load game assets
+        loadAssets();
+        
+        // Initialize game objects
+        initGame();
+        
+        // Set focusable so we can handle events
+        setFocusable(true);
+    }
+    
+    private void initPaints() {
+        textPaint = new Paint();
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(36);
+        textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        textPaint.setAntiAlias(true);
+        
+        scorePaint = new Paint();
+        scorePaint.setColor(Color.WHITE);
+        scorePaint.setTextSize(48);
+        scorePaint.setTypeface(Typeface.DEFAULT_BOLD);
+        scorePaint.setAntiAlias(true);
+        
+        gameOverPaint = new Paint();
+        gameOverPaint.setColor(Color.RED);
+        gameOverPaint.setTextSize(72);
+        gameOverPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        gameOverPaint.setAntiAlias(true);
+    }
+    
+    private void loadAssets() {
+        // Load all game images
+        bikeNormalImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("bike_normal", "drawable", getContext().getPackageName()));
+        bikeWheelieImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("bike_wheelie", "drawable", getContext().getPackageName()));
+        bikeJumpImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("bike_jump", "drawable", getContext().getPackageName()));
+        carImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("car", "drawable", getContext().getPackageName()));
+        rockImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("rock", "drawable", getContext().getPackageName()));
+        oilImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("oil", "drawable", getContext().getPackageName()));
+        coneImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("cone", "drawable", getContext().getPackageName()));
+        backgroundImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("background", "drawable", getContext().getPackageName()));
+        finishLineImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("finish_line", "drawable", getContext().getPackageName()));
+        speedLinesImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("speed_lines", "drawable", getContext().getPackageName()));
+        dustImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("dust", "drawable", getContext().getPackageName()));
+        crashImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("crash", "drawable", getContext().getPackageName()));
+        stuntStarsImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("stunt_stars", "drawable", getContext().getPackageName()));
+        
+        // Scale background to screen size if needed
+        backgroundImg = Bitmap.createScaledBitmap(backgroundImg, screenWidth, screenHeight, true);
+    }
+    
+    private void initGame() {
+        // Create player
+        player = new Player(bikeNormalImg, bikeWheelieImg, bikeJumpImg, screenWidth, screenHeight);
+        
+        // Set effect images for player
+        player.setEffectImages(speedLinesImg, dustImg, stuntStarsImg);
+        
+        // Create obstacles
+        obstacles = new ArrayList<>();
+        createObstacles();
+        
+        // Create touch controls
+        createTouchControls();
+    }
+    
+    private void createObstacles() {
+        // Create initial obstacles
+        for (int i = 0; i < 5; i++) {
+            int x = random.nextInt(500) + 150; // Keep within road boundaries
+            int y = random.nextInt(550) - 600; // Start above the screen
+            int speed = random.nextInt(4) + 3;  // Speed between 3-7
+            String obstacleType = getRandomObstacleType();
+            
+            Bitmap obstacleImg;
+            boolean isHazard = true;
+            
+            switch (obstacleType) {
+                case "car":
+                    obstacleImg = carImg;
+                    break;
+                case "rock":
+                    obstacleImg = rockImg;
+                    break;
+                case "oil":
+                    obstacleImg = oilImg;
+                    isHazard = false;
+                    break;
+                case "cone":
+                    obstacleImg = coneImg;
+                    break;
+                default:
+                    obstacleImg = carImg;
+                    break;
+            }
+            
+            obstacles.add(new Obstacle(obstacleImg, x, y, speed, obstacleType, isHazard));
+        }
+    }
+    
+    private String getRandomObstacleType() {
+        String[] types = {"car", "rock", "oil", "cone"};
+        return types[random.nextInt(types.length)];
+    }
+    
+    private void createTouchControls() {
+        int buttonSize = 80;
+        int buttonMargin = 20;
+        int buttonAlpha = 150;
+        
+        // D-pad controls for movement
+        leftButton = new TouchButton(
+                buttonMargin,
+                screenHeight - buttonSize - buttonMargin,
+                buttonSize,
+                buttonSize,
+                "←",
+                Color.argb(buttonAlpha, 200, 200, 200),
+                Color.BLACK
+        );
+        
+        rightButton = new TouchButton(
+                buttonMargin * 2 + buttonSize,
+                screenHeight - buttonSize - buttonMargin,
+                buttonSize,
+                buttonSize,
+                "→",
+                Color.argb(buttonAlpha, 200, 200, 200),
+                Color.BLACK
+        );
+        
+        upButton = new TouchButton(
+                buttonMargin + buttonSize,
+                screenHeight - buttonSize * 2 - buttonMargin,
+                buttonSize,
+                buttonSize,
+                "↑",
+                Color.argb(buttonAlpha, 200, 200, 200),
+                Color.BLACK
+        );
+        
+        downButton = new TouchButton(
+                buttonMargin + buttonSize,
+                screenHeight - buttonSize - buttonMargin,
+                buttonSize,
+                buttonSize,
+                "↓",
+                Color.argb(buttonAlpha, 200, 200, 200),
+                Color.BLACK
+        );
+        
+        // Stunt buttons
+        wheelieButton = new TouchButton(
+                screenWidth - buttonSize - buttonMargin,
+                screenHeight - buttonSize - buttonMargin,
+                buttonSize,
+                buttonSize,
+                "W",
+                Color.argb(buttonAlpha, 255, 200, 0),
+                Color.BLACK
+        );
+        
+        jumpButton = new TouchButton(
+                screenWidth - buttonSize * 2 - buttonMargin * 2,
+                screenHeight - buttonSize - buttonMargin,
+                buttonSize,
+                buttonSize,
+                "J",
+                Color.argb(buttonAlpha, 0, 200, 255),
+                Color.BLACK
+        );
+        
+        // Restart button (only shown when game is over or won)
+        restartButton = new TouchButton(
+                screenWidth / 2 - buttonSize,
+                screenHeight / 2 + 100,
+                buttonSize * 2,
+                buttonSize,
+                "Restart",
+                Color.argb(buttonAlpha, 0, 255, 0),
+                Color.BLACK
+        );
+    }
+    
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        // Start the game thread when surface is created
+        gameThread = new GameThread(holder);
+        gameThread.setRunning(true);
+        gameThread.start();
+        isPlaying = true;
+    }
+    
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        // Handle surface changes if needed
+    }
+    
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        // Stop the game thread when surface is destroyed
+        boolean retry = true;
+        gameThread.setRunning(false);
+        
+        while (retry) {
+            try {
+                gameThread.join();
+                retry = false;
+            } catch (InterruptedException e) {
+                // Retry
+            }
+        }
+    }
+    
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = event.getAction();
+        float x = event.getX();
+        float y = event.getY();
+        
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                // Check if any buttons are pressed
+                if (leftButton.isPressed(x, y)) {
+                    leftButton.setPressed(true);
+                    touchDirection = "left";
+                } else if (rightButton.isPressed(x, y)) {
+                    rightButton.setPressed(true);
+                    touchDirection = "right";
+                } else if (upButton.isPressed(x, y)) {
+                    upButton.setPressed(true);
+                    touchDirection = "up";
+                } else if (downButton.isPressed(x, y)) {
+                    downButton.setPressed(true);
+                    touchDirection = "down";
+                } else if (wheelieButton.isPressed(x, y)) {
+                    wheelieButton.setPressed(true);
+                    touchStunt = "wheelie";
+                } else if (jumpButton.isPressed(x, y)) {
+                    jumpButton.setPressed(true);
+                    touchStunt = "jump";
+                } else if ((gameOver || gameWon) && restartButton.isPressed(x, y)) {
+                    // Restart the game
+                    restartGame();
+                }
+                break;
+                
+            case MotionEvent.ACTION_MOVE:
+                // Reset touch inputs
+                touchDirection = null;
+                touchStunt = null;
+                
+                // Update button states based on touch position
+                leftButton.setPressed(leftButton.isPressed(x, y));
+                if (leftButton.isPressed()) {
+                    touchDirection = "left";
+                }
+                
+                rightButton.setPressed(rightButton.isPressed(x, y));
+                if (rightButton.isPressed()) {
+                    touchDirection = "right";
+                }
+                
+                upButton.setPressed(upButton.isPressed(x, y));
+                if (upButton.isPressed()) {
+                    touchDirection = "up";
+                }
+                
+                downButton.setPressed(downButton.isPressed(x, y));
+                if (downButton.isPressed()) {
+                    touchDirection = "down";
+                }
+                
+                wheelieButton.setPressed(wheelieButton.isPressed(x, y));
+                if (wheelieButton.isPressed()) {
+                    touchStunt = "wheelie";
+                }
+                
+                jumpButton.setPressed(jumpButton.isPressed(x, y));
+                if (jumpButton.isPressed()) {
+                    touchStunt = "jump";
+                }
+                break;
+                
+            case MotionEvent.ACTION_UP:
+                // Reset all button states
+                leftButton.setPressed(false);
+                rightButton.setPressed(false);
+                upButton.setPressed(false);
+                downButton.setPressed(false);
+                wheelieButton.setPressed(false);
+                jumpButton.setPressed(false);
+                
+                // Reset touch inputs
+                touchDirection = null;
+                touchStunt = null;
+                break;
+        }
+        
+        return true;
+    }
+    
+    private void restartGame() {
+        // Reset game state
+        gameOver = false;
+        gameWon = false;
+        score = 0;
+        distance = 0;
+        roadY = 0;
+        
+        // Reset player
+        player = new Player(bikeNormalImg, bikeWheelieImg, bikeJumpImg, screenWidth, screenHeight);
+        
+        // Reset obstacles
+        obstacles.clear();
+        createObstacles();
+        
+        // Reset effects
+        showCrashEffect = false;
+        crashEffectTimer = 0;
+        stuntBonusText = null;
+        stuntBonusTimer = 0;
+    }
+    
+    private void update() {
+        if (!gameOver && !gameWon) {
+            // Update road position (for scrolling effect)
+            roadY = (roadY + roadSpeed) % screenHeight;
+            
+            // Update player
+            player.update();
+            
+            // Move player based on touch input
+            if (touchDirection != null || touchStunt != null) {
+                player.move(touchDirection, touchStunt);
+            }
+            
+            // Update obstacles
+            for (Obstacle obstacle : obstacles) {
+                obstacle.update(screenHeight, screenWidth);
+            }
+            
+            // Check for collisions
+            checkCollision();
+            
+            // Check for completed stunts
+            if (!player.isPerformingStunt() && player.getStuntCooldown() == player.getStuntCooldownDuration() - 1) {
+                // This means a stunt just ended
+                addStuntBonus();
+            }
+            
+            // Increase score and distance
+            score++;
+            distance += roadSpeed;
+            
+            // Check if player reached finish line
+            if (distance >= Math.abs(finishLineY)) {
+                gameWon = true;
+            }
+        }
+        
+        // Update effect timers
+        if (crashEffectTimer > 0) {
+            crashEffectTimer--;
+            if (crashEffectTimer <= 0) {
+                showCrashEffect = false;
+            }
+        }
+        
+        if (stuntBonusTimer > 0) {
+            stuntBonusTimer--;
+        }
+    }
+    
+    private void checkCollision() {
+        for (Obstacle obstacle : obstacles) {
+            if (player.getCollisionRect().intersect(obstacle.getCollisionRect())) {
+                if (obstacle.isHazard()) {  // Only crash on hazardous obstacles
+                    gameOver = true;
+                    // Show crash effect
+                    showCrashEffect = true;
+                    crashEffectTimer = 60;  // Show for 1 second
+                    crashEffectX = player.getX();
+                    crashEffectY = player.getY();
+                } else {  // Oil slick - slow down the player
+                    player.setSpeed(Math.max(2, player.getSpeed() - 1));  // Slow down but not below 2
+                }
+            }
+        }
+    }
+    
+    private void addStuntBonus() {
+        if (player.getLastStuntType() != null) {
+            int bonus = player.getStuntPoints(player.getLastStuntType());
+            score += bonus;
+            
+            // Show bonus text
+            stuntBonusText = "+" + bonus + " STUNT!";
+            stuntBonusTimer = 60;  // Show for 1 second
+        }
+    }
+    
+    private void drawGame(Canvas canvas) {
+        if (canvas != null) {
+            // Clear the canvas
+            canvas.drawColor(Color.BLACK);
+            
+            // Draw background
+            canvas.drawBitmap(backgroundImg, 0, 0, null);
+            
+            // Draw finish line if it's visible on screen
+            int finishLineScreenY = finishLineY + distance;
+            if (-50 <= finishLineScreenY && finishLineScreenY <= screenHeight) {
+                canvas.drawBitmap(finishLineImg, 150, finishLineScreenY, null);
+            }
+            
+            // Draw obstacles
+            for (Obstacle obstacle : obstacles) {
+                obstacle.draw(canvas);
+            }
+            
+            // Draw the player
+            player.draw(canvas);
+            
+            // Draw crash effect if active
+            if (showCrashEffect) {
+                canvas.drawBitmap(crashImg, crashEffectX - 30, crashEffectY - 30, null);
+            }
+            
+            // Draw score and distance
+            canvas.drawText("Score: " + score, 10, 50, textPaint);
+            canvas.drawText("Distance: " + distance + "m", 10, 100, textPaint);
+            
+            // Draw stunt info
+            if (player.isPerformingStunt()) {
+                String stuntName = player.getStuntType().toUpperCase();
+                Paint stuntPaint = new Paint(textPaint);
+                stuntPaint.setColor(Color.YELLOW);
+                canvas.drawText("PERFORMING: " + stuntName, screenWidth - 300, 50, stuntPaint);
+            }
+            
+            // Draw stunt bonus text if active
+            if (stuntBonusTimer > 0) {
+                Paint bonusPaint = new Paint(scorePaint);
+                bonusPaint.setColor(Color.YELLOW);
+                // Make it float up and fade out
+                int yOffset = (int)(20 * (1 - stuntBonusTimer / 60.0f));
+                int alpha = (int)(255 * (stuntBonusTimer / 60.0f));
+                bonusPaint.setAlpha(alpha);
+                canvas.drawText(stuntBonusText, player.getX(), player.getY() - 50 - yOffset, bonusPaint);
+            }
+            
+            // Draw touch controls
+            if (!gameOver && !gameWon) {
+                // Draw movement buttons
+                leftButton.draw(canvas);
+                rightButton.draw(canvas);
+                upButton.draw(canvas);
+                downButton.draw(canvas);
+                
+                // Draw stunt buttons
+                wheelieButton.draw(canvas);
+                jumpButton.draw(canvas);
+                
+                // Draw small control hints
+                Paint hintPaint = new Paint(textPaint);
+                hintPaint.setTextSize(18);
+                canvas.drawText("Wheelie", wheelieButton.getX() + wheelieButton.getWidth() / 2 - 30, 
+                        wheelieButton.getY() - 10, hintPaint);
+                canvas.drawText("Jump", jumpButton.getX() + jumpButton.getWidth() / 2 - 20, 
+                        jumpButton.getY() - 10, hintPaint);
+            }
+            
+            // Draw game over message if game is over
+            if (gameOver) {
+                String gameOverText = "GAME OVER";
+                float textWidth = gameOverPaint.measureText(gameOverText);
+                canvas.drawText(gameOverText, screenWidth / 2 - textWidth / 2, screenHeight / 2, gameOverPaint);
+                
+                // Show final score
+                String finalScoreText = "Final Score: " + score;
+                float scoreWidth = scorePaint.measureText(finalScoreText);
+                canvas.drawText(finalScoreText, screenWidth / 2 - scoreWidth / 2, screenHeight / 2 + 50, scorePaint);
+                
+                // Draw restart button
+                restartButton.draw(canvas);
+            }
+            
+            // Draw win message if player won
+            else if (gameWon) {
+                gameOverPaint.setColor(Color.GREEN);
+                String winText = "YOU WIN!";
+                float textWidth = gameOverPaint.measureText(winText);
+                canvas.drawText(winText, screenWidth / 2 - textWidth / 2, screenHeight / 2, gameOverPaint);
+                
+                // Show final score
+                String finalScoreText = "Final Score: " + score;
+                float scoreWidth = scorePaint.measureText(finalScoreText);
+                canvas.drawText(finalScoreText, screenWidth / 2 - scoreWidth / 2, screenHeight / 2 + 50, scorePaint);
+                
+                // Draw restart button
+                restartButton.draw(canvas);
+                
+                // Reset paint color
+                gameOverPaint.setColor(Color.RED);
+            }
+        }
+    }
+    
+    // Game thread class
+    private class GameThread extends Thread {
+        private SurfaceHolder surfaceHolder;
+        private boolean running;
+        private static final int TARGET_FPS = 60;
+        private static final long TARGET_TIME = 1000 / TARGET_FPS;
+        
+        public GameThread(SurfaceHolder holder) {
+            this.surfaceHolder = holder;
+        }
+        
+        public void setRunning(boolean running) {
+            this.running = running;
+        }
+        
+        @Override
+        public void run() {
+            long startTime;
+            long timeMillis;
+            long waitTime;
+            
+            while (running) {
+                startTime = System.nanoTime();
+                Canvas canvas = null;
+                
+                try {
+                    canvas = surfaceHolder.lockCanvas();
+                    synchronized (surfaceHolder) {
+                        update();
+                        drawGame(canvas);
+                    }
+                } finally {
+                    if (canvas != null) {
+                        surfaceHolder.unlockCanvasAndPost(canvas);
+                    }
+                }
+                
+                timeMillis = (System.nanoTime() - startTime) / 1000000;
+                waitTime = TARGET_TIME - timeMillis;
+                
+                if (waitTime > 0) {
+                    try {
+                        sleep(waitTime);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+}
