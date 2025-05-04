@@ -2,6 +2,8 @@ package com.racingdrama;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 
 import java.util.HashMap;
@@ -55,6 +57,26 @@ public class Player {
     private Bitmap dustImg;
     private Bitmap stuntStarsImg;
     
+    // Physics and animation properties
+    private float leanAngle = 0; // Angle for bike leaning (in degrees)
+    private float maxLeanAngle = 20; // Maximum lean angle
+    private float leanSpeed = 2.0f; // How quickly the bike leans
+    private float targetLeanAngle = 0; // Target angle when turning
+    
+    // Suspension properties
+    private float suspensionOffset = 0; // Vertical offset for suspension effect
+    private float maxSuspensionCompress = 10; // Maximum suspension compression
+    private float suspensionSpeed = 0.8f; // How quickly suspension compresses/extends
+    private boolean isLanding = false; // Flag for when bike is landing from a jump
+    
+    // Movement history for smoother turning
+    private float lastHorizontalInput = 0;
+    private float horizontalInputSmoothing = 0.2f; // Smoothing factor for turning
+    
+    // Paint for drawing with transformations
+    private Paint bikePaint;
+    private Matrix transformMatrix;
+    
     public Player(Bitmap normalImage, Bitmap wheelieImage, Bitmap jumpImage, int screenWidth, int screenHeight) {
         this.normalImage = normalImage;
         this.wheelieImage = wheelieImage;
@@ -102,6 +124,14 @@ public class Player {
         this.showDust = false;
         this.showStars = false;
         this.effectTimer = 0;
+        
+        // Initialize physics and animation properties
+        this.bikePaint = new Paint();
+        this.transformMatrix = new Matrix();
+        
+        // Enable filtering for smoother rotation
+        this.bikePaint.setFilterBitmap(true);
+        this.bikePaint.setAntiAlias(true);
     }
     
     public void setEffectImages(Bitmap speedLinesImg, Bitmap dustImg, Bitmap stuntStarsImg) {
@@ -111,22 +141,49 @@ public class Player {
     }
     
     public void draw(Canvas canvas) {
+        // Save the current canvas state
+        canvas.save();
+        
         // Draw particle effects behind the bike
         if (showSpeedLines && speedLinesImg != null) {
             canvas.drawBitmap(speedLinesImg, x - 80, y + 20, null);
         }
         
         if (showDust && dustImg != null) {
-            canvas.drawBitmap(dustImg, x - 10, y + height - 20, null);
+            // Draw dust with more intensity when landing
+            float dustScale = isLanding ? 1.5f : 1.0f;
+            
+            // Create a matrix for dust transformation
+            Matrix dustMatrix = new Matrix();
+            dustMatrix.postScale(dustScale, dustScale, dustImg.getWidth()/2, 0);
+            dustMatrix.postTranslate(x - 10, y + height - 20 + suspensionOffset);
+            
+            canvas.drawBitmap(dustImg, dustMatrix, bikePaint);
         }
         
-        // Draw the bike image
-        canvas.drawBitmap(currentImage, x, y, null);
+        // Set up the transformation matrix for the bike
+        transformMatrix.reset();
+        
+        // Calculate the center point of the bike for rotation
+        float pivotX = width / 2.0f;
+        float pivotY = height / 2.0f;
+        
+        // Apply rotation for leaning effect
+        transformMatrix.postRotate(leanAngle, pivotX, pivotY);
+        
+        // Apply translation for position and suspension effect
+        transformMatrix.postTranslate(x, y + suspensionOffset);
+        
+        // Draw the bike image with transformations
+        canvas.drawBitmap(currentImage, transformMatrix, bikePaint);
         
         // Draw stunt stars above the bike if performing a stunt
         if (showStars && stuntStarsImg != null) {
-            canvas.drawBitmap(stuntStarsImg, x - 25, y - 60, null);
+            canvas.drawBitmap(stuntStarsImg, x - 25, y - 60 + suspensionOffset, null);
         }
+        
+        // Restore the canvas state
+        canvas.restore();
     }
     
     public boolean startStunt(String stuntType) {
@@ -184,8 +241,40 @@ public class Player {
             showStars = false;
         }
         
-        // Update collision rectangle
-        collisionRect.set(x, y, x + width, y + height);
+        // Update bike lean angle - gradually move toward target angle
+        if (Math.abs(leanAngle - targetLeanAngle) > 0.1f) {
+            // Smoothly interpolate between current and target angle
+            leanAngle += (targetLeanAngle - leanAngle) * leanSpeed * 0.1f;
+        } else {
+            leanAngle = targetLeanAngle; // Snap to target when very close
+        }
+        
+        // Update suspension effect
+        if (isLanding) {
+            // Compress suspension when landing
+            suspensionOffset = Math.min(suspensionOffset + suspensionSpeed, maxSuspensionCompress);
+            
+            // If fully compressed, start extending
+            if (suspensionOffset >= maxSuspensionCompress) {
+                isLanding = false;
+            }
+        } else {
+            // Gradually return suspension to normal
+            if (suspensionOffset > 0) {
+                suspensionOffset = Math.max(0, suspensionOffset - suspensionSpeed);
+            }
+        }
+        
+        // Special handling for jump stunt
+        if ("jump".equals(stuntType)) {
+            // When jump is about to end, trigger landing effect
+            if (stuntTimer <= 5) {
+                isLanding = true;
+            }
+        }
+        
+        // Update collision rectangle - adjust for suspension
+        collisionRect.set(x, (int)(y + suspensionOffset), x + width, (int)(y + height + suspensionOffset));
     }
     
     public void move(String direction, String stunt) {
@@ -194,20 +283,31 @@ public class Player {
             if ("left".equals(direction)) {
                 // Move left, but not beyond the left road boundary
                 x = Math.max(roadLeftBoundary, x - speed);
+                // Set target lean angle for left turn
+                targetLeanAngle = -maxLeanAngle;
             } else if ("right".equals(direction)) {
                 // Move right, but not beyond the right road boundary
                 x = Math.min(roadRightBoundary - width, x + speed);
+                // Set target lean angle for right turn
+                targetLeanAngle = maxLeanAngle;
             } else if ("up".equals(direction)) {
                 // Move up, but not beyond the top road boundary
                 y = Math.max(roadTopBoundary, y - speed);
+                // Reset lean angle when moving straight
+                targetLeanAngle = 0;
             } else if ("down".equals(direction)) {
                 // Move down, but not beyond the bottom road boundary
                 y = Math.min(roadBottomBoundary - height, y + speed);
+                // Reset lean angle when moving straight
+                targetLeanAngle = 0;
             }
             
             // Ensure the bike stays within road boundaries (additional safety check)
             x = Math.max(roadLeftBoundary, Math.min(roadRightBoundary - width, x));
             y = Math.max(roadTopBoundary, Math.min(roadBottomBoundary - height, y));
+        } else {
+            // Gradually return to upright position when not turning
+            targetLeanAngle = 0;
         }
         
         // Handle stunts
@@ -216,11 +316,14 @@ public class Player {
                 startStunt("wheelie");
             } else if ("jump".equals(stunt)) {
                 startStunt("jump");
+                // Trigger suspension effect for jump
+                isLanding = false;
+                suspensionOffset = -5; // Slight upward movement for jump start
             }
         }
         
-        // Update collision rectangle
-        collisionRect.set(x, y, x + width, y + height);
+        // Update collision rectangle - adjust for suspension
+        collisionRect.set(x, (int)(y + suspensionOffset), x + width, (int)(y + height + suspensionOffset));
     }
     
     // Getters and setters
@@ -295,6 +398,10 @@ public class Player {
     
     // Method for continuous joystick movement
     public void moveWithJoystick(float horizontalInput, float verticalInput) {
+        // Apply smoothing to horizontal input for more natural turning
+        horizontalInput = lastHorizontalInput + (horizontalInput - lastHorizontalInput) * (1 - horizontalInputSmoothing);
+        lastHorizontalInput = horizontalInput;
+        
         // Scale the input by speed
         int deltaX = (int)(horizontalInput * speed);
         int deltaY = (int)(verticalInput * speed);
@@ -303,12 +410,16 @@ public class Player {
         x += deltaX;
         y += deltaY;
         
+        // Set lean angle based on horizontal input (turning)
+        // Map the input range (-1 to 1) to the lean angle range (-maxLeanAngle to maxLeanAngle)
+        targetLeanAngle = horizontalInput * maxLeanAngle;
+        
         // Ensure the bike stays within road boundaries
         x = Math.max(roadLeftBoundary, Math.min(roadRightBoundary - width, x));
         y = Math.max(roadTopBoundary, Math.min(roadBottomBoundary - height, y));
         
-        // Update collision rectangle
-        collisionRect.set(x, y, x + width, y + height);
+        // Update collision rectangle - adjust for suspension
+        collisionRect.set(x, (int)(y + suspensionOffset), x + width, (int)(y + height + suspensionOffset));
     }
     
     // Method to reset position if bike gets stuck
@@ -316,6 +427,16 @@ public class Player {
         // Reset to a safe position within the road boundaries
         this.x = roadLeftBoundary + 50; // 50 pixels from the left road boundary
         this.y = roadBottomBoundary - height - 50; // 50 pixels from the bottom road boundary
+        
+        // Reset physics and animation properties
+        this.leanAngle = 0;
+        this.targetLeanAngle = 0;
+        this.suspensionOffset = 0;
+        this.isLanding = false;
+        this.lastHorizontalInput = 0;
+        
+        // Reset image to normal
+        this.currentImage = normalImage;
         
         // Update collision rectangle
         collisionRect.set(x, y, x + width, y + height);
