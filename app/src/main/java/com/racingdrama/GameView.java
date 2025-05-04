@@ -8,9 +8,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,25 +134,163 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
     
     private void loadAssets() {
-        // Load bike images from the BikeStyleManager
-        bikeNormalImg = bikeStyleManager.getBikeNormalImg();
-        bikeWheelieImg = bikeStyleManager.getBikeWheelieImg();
-        bikeJumpImg = bikeStyleManager.getBikeJumpImg();
+        try {
+            // Load bike images from the BikeStyleManager
+            bikeNormalImg = bikeStyleManager.getBikeNormalImg();
+            bikeWheelieImg = bikeStyleManager.getBikeWheelieImg();
+            bikeJumpImg = bikeStyleManager.getBikeJumpImg();
+            
+            // Load all other game images with error handling
+            loadDrawableWithFallback("car", Color.RED, new int[]{100, 60});
+            loadDrawableWithFallback("rock", Color.GRAY, new int[]{50, 50});
+            loadDrawableWithFallback("oil", Color.BLACK, new int[]{60, 30});
+            loadDrawableWithFallback("cone", Color.YELLOW, new int[]{40, 60});
+            loadDrawableWithFallback("background", Color.BLUE, new int[]{screenWidth, screenHeight});
+            loadDrawableWithFallback("finish_line", Color.WHITE, new int[]{screenWidth, 50});
+            loadDrawableWithFallback("speed_lines", Color.WHITE, new int[]{200, 120});
+            loadDrawableWithFallback("dust", Color.LTGRAY, new int[]{150, 100});
+            loadDrawableWithFallback("crash", Color.YELLOW, new int[]{200, 200});
+            loadDrawableWithFallback("stunt_stars", Color.YELLOW, new int[]{200, 120});
+            
+            // Scale background to screen size if needed
+            if (backgroundImg != null) {
+                backgroundImg = Bitmap.createScaledBitmap(backgroundImg, screenWidth, screenHeight, true);
+            }
+        } catch (Exception e) {
+            // Create fallback images if there's a catastrophic failure
+            createFallbackImages();
+        }
+    }
+    
+    private void loadDrawableWithFallback(String resourceName, int fallbackColor, int[] dimensions) {
+        try {
+            int resourceId = getResources().getIdentifier(resourceName, "drawable", getContext().getPackageName());
+            Bitmap bitmap = null;
+            
+            // Try to load as vector drawable first
+            try {
+                VectorDrawableCompat drawable = VectorDrawableCompat.create(getResources(), resourceId, null);
+                if (drawable != null) {
+                    bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    drawable.draw(canvas);
+                }
+            } catch (Exception e) {
+                // If vector drawable fails, try BitmapFactory
+                bitmap = BitmapFactory.decodeResource(getResources(), resourceId);
+            }
+            
+            // If both methods fail, create a fallback
+            if (bitmap == null) {
+                bitmap = createFallbackBitmap(dimensions[0], dimensions[1], fallbackColor);
+            }
+            
+            // Assign the bitmap to the appropriate field
+            switch (resourceName) {
+                case "car":
+                    carImg = bitmap;
+                    break;
+                case "rock":
+                    rockImg = bitmap;
+                    break;
+                case "oil":
+                    oilImg = bitmap;
+                    break;
+                case "cone":
+                    coneImg = bitmap;
+                    break;
+                case "background":
+                    backgroundImg = bitmap;
+                    break;
+                case "finish_line":
+                    finishLineImg = bitmap;
+                    break;
+                case "speed_lines":
+                    speedLinesImg = bitmap;
+                    break;
+                case "dust":
+                    dustImg = bitmap;
+                    break;
+                case "crash":
+                    crashImg = bitmap;
+                    break;
+                case "stunt_stars":
+                    stuntStarsImg = bitmap;
+                    break;
+            }
+        } catch (Exception e) {
+            // Create a fallback bitmap if anything goes wrong
+            Bitmap fallback = createFallbackBitmap(dimensions[0], dimensions[1], fallbackColor);
+            
+            // Assign the fallback bitmap to the appropriate field
+            switch (resourceName) {
+                case "car":
+                    carImg = fallback;
+                    break;
+                case "rock":
+                    rockImg = fallback;
+                    break;
+                case "oil":
+                    oilImg = fallback;
+                    break;
+                case "cone":
+                    coneImg = fallback;
+                    break;
+                case "background":
+                    backgroundImg = fallback;
+                    break;
+                case "finish_line":
+                    finishLineImg = fallback;
+                    break;
+                case "speed_lines":
+                    speedLinesImg = fallback;
+                    break;
+                case "dust":
+                    dustImg = fallback;
+                    break;
+                case "crash":
+                    crashImg = fallback;
+                    break;
+                case "stunt_stars":
+                    stuntStarsImg = fallback;
+                    break;
+            }
+        }
+    }
+    
+    private Bitmap createFallbackBitmap(int width, int height, int color) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setColor(color);
         
-        // Load all other game images
-        carImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("car", "drawable", getContext().getPackageName()));
-        rockImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("rock", "drawable", getContext().getPackageName()));
-        oilImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("oil", "drawable", getContext().getPackageName()));
-        coneImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("cone", "drawable", getContext().getPackageName()));
-        backgroundImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("background", "drawable", getContext().getPackageName()));
-        finishLineImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("finish_line", "drawable", getContext().getPackageName()));
-        speedLinesImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("speed_lines", "drawable", getContext().getPackageName()));
-        dustImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("dust", "drawable", getContext().getPackageName()));
-        crashImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("crash", "drawable", getContext().getPackageName()));
-        stuntStarsImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("stunt_stars", "drawable", getContext().getPackageName()));
+        // Draw a simple shape based on the resource type
+        canvas.drawRect(0, 0, width, height, paint);
         
-        // Scale background to screen size if needed
-        backgroundImg = Bitmap.createScaledBitmap(backgroundImg, screenWidth, screenHeight, true);
+        // Add some visual interest
+        paint.setColor(Color.BLACK);
+        paint.setStrokeWidth(2);
+        paint.setStyle(Paint.Style.STROKE);
+        canvas.drawRect(2, 2, width-2, height-2, paint);
+        
+        return bitmap;
+    }
+    
+    private void createFallbackImages() {
+        bikeNormalImg = createFallbackBitmap(100, 60, Color.BLUE);
+        bikeWheelieImg = createFallbackBitmap(100, 60, Color.GREEN);
+        bikeJumpImg = createFallbackBitmap(100, 60, Color.RED);
+        carImg = createFallbackBitmap(100, 60, Color.RED);
+        rockImg = createFallbackBitmap(50, 50, Color.GRAY);
+        oilImg = createFallbackBitmap(60, 30, Color.BLACK);
+        coneImg = createFallbackBitmap(40, 60, Color.YELLOW);
+        backgroundImg = createFallbackBitmap(screenWidth, screenHeight, Color.BLUE);
+        finishLineImg = createFallbackBitmap(screenWidth, 50, Color.WHITE);
+        speedLinesImg = createFallbackBitmap(200, 120, Color.WHITE);
+        dustImg = createFallbackBitmap(150, 100, Color.LTGRAY);
+        crashImg = createFallbackBitmap(200, 200, Color.YELLOW);
+        stuntStarsImg = createFallbackBitmap(200, 120, Color.YELLOW);
     }
     
     private void initGame() {
