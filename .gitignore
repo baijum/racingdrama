@@ -57,4 +57,5 @@ google-services.json
 
 # Backup files
 *.bak
+.vscode/
 *.tmp
