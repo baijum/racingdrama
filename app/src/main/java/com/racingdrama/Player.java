@@ -405,7 +405,9 @@ public class Player {
     }
     
     public int getStuntPoints(String stuntType) {
-        return stuntPoints.getOrDefault(stuntType, 0);
+        // Use a safer approach that works on API 21+
+        Integer points = stuntPoints.get(stuntType);
+        return points != null ? points : 0;
     }
     
     // Road boundary getters
@@ -469,5 +471,28 @@ public class Player {
         
         // Update collision rectangle
         collisionRect.set(x, y, x + width, y + height);
+    }
+    
+    /**
+     * Updates the bike images with new style
+     * @param normalImage New normal bike image
+     * @param wheelieImage New wheelie bike image
+     * @param jumpImage New jump bike image
+     */
+    public void updateBikeImages(Bitmap normalImage, Bitmap wheelieImage, Bitmap jumpImage) {
+        this.normalImage = normalImage;
+        this.wheelieImage = wheelieImage;
+        this.jumpImage = jumpImage;
+        
+        // Update current image based on current state
+        if (performingStunt) {
+            if ("wheelie".equals(stuntType)) {
+                currentImage = wheelieImage;
+            } else if ("jump".equals(stuntType)) {
+                currentImage = jumpImage;
+            }
+        } else {
+            currentImage = normalImage;
+        }
     }
 }

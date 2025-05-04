@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#222222">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/bike_style_settings"
+        android:textSize="24sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/select_bike_style"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/bike_style_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/style_classic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/style_classic"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="8dp" />
+
+        <RadioButton
+            android:id="@+id/style_sport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/style_sport"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="8dp" />
+
+        <RadioButton
+            android:id="@+id/style_retro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/style_retro"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="8dp" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/save"
+        android:layout_marginTop="24dp"
+        android:background="#3F51B5"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/back_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/back_to_game"
+        android:layout_marginTop="8dp"
+        android:background="#555555"
+        android:textColor="#FFFFFF" />
+</LinearLayout> 

@@ -80,6 +80,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     // Random generator
     private Random random;
     
+    private BikeStyleManager bikeStyleManager;
+    
     public GameView(Context context, int screenWidth, int screenHeight) {
         super(context);
         
@@ -89,6 +91,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         // Get the holder and add callback
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
+        
+        // Create bike style manager
+        bikeStyleManager = new BikeStyleManager(context);
         
         // Initialize random generator
         random = new Random();
@@ -127,10 +132,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
     
     private void loadAssets() {
-        // Load all game images
-        bikeNormalImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("bike_normal", "drawable", getContext().getPackageName()));
-        bikeWheelieImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("bike_wheelie", "drawable", getContext().getPackageName()));
-        bikeJumpImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("bike_jump", "drawable", getContext().getPackageName()));
+        // Load bike images from the BikeStyleManager
+        bikeNormalImg = bikeStyleManager.getBikeNormalImg();
+        bikeWheelieImg = bikeStyleManager.getBikeWheelieImg();
+        bikeJumpImg = bikeStyleManager.getBikeJumpImg();
+        
+        // Load all other game images
         carImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("car", "drawable", getContext().getPackageName()));
         rockImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("rock", "drawable", getContext().getPackageName()));
         oilImg = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("oil", "drawable", getContext().getPackageName()));
@@ -273,6 +280,19 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        // Check if bike style has changed and reload if necessary
+        bikeStyleManager.reloadIfStyleChanged();
+        
+        // Reload bike images if style changed
+        bikeNormalImg = bikeStyleManager.getBikeNormalImg();
+        bikeWheelieImg = bikeStyleManager.getBikeWheelieImg();
+        bikeJumpImg = bikeStyleManager.getBikeJumpImg();
+        
+        // Update player bike images
+        if (player != null) {
+            player.updateBikeImages(bikeNormalImg, bikeWheelieImg, bikeJumpImg);
+        }
+        
         // Start the game thread when surface is created
         gameThread = new GameThread(holder);
         gameThread.setRunning(true);
@@ -423,28 +443,25 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
     
     private void restartGame() {
-        // Reset game state
-        gameOver = false;
-        gameWon = false;
+        // Initialize game state
         score = 0;
         distance = 0;
-        roadY = 0;
+        obstacles.clear();
+        gameOver = false;
+        gameWon = false;
+        showCrashEffect = false;
         
-        // Reset player
-        player = new Player(bikeNormalImg, bikeWheelieImg, bikeJumpImg, screenWidth, screenHeight);
+        // Create new player with current bike style
+        player = new Player(bikeStyleManager.getBikeNormalImg(), 
+                           bikeStyleManager.getBikeWheelieImg(), 
+                           bikeStyleManager.getBikeJumpImg(), 
+                           screenWidth, screenHeight);
         
         // Set effect images for player
         player.setEffectImages(speedLinesImg, dustImg, stuntStarsImg);
         
-        // Reset obstacles
-        obstacles.clear();
+        // Create new obstacles
         createObstacles();
-        
-        // Reset effects
-        showCrashEffect = false;
-        crashEffectTimer = 0;
-        stuntBonusText = null;
-        stuntBonusTimer = 0;
     }
     
     private void update() {
