@@ -303,23 +303,25 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int action = event.getAction();
-        float x = event.getX();
-        float y = event.getY();
+        // Get action with pointer index
+        int actionMasked = event.getActionMasked();
+        int actionIndex = event.getActionIndex();
+        int pointerId = event.getPointerId(actionIndex);
         
-        // First, check if the joystick handles this touch event
-        boolean joystickHandled = joystick.onTouchEvent(x, y, action);
-        
-        // If joystick is active, get the direction from it
-        if (joystick.isActive()) {
-            touchDirection = joystick.getDirection();
-        } else if (!joystickHandled) {
-            // If joystick didn't handle the touch, check other buttons
-            touchDirection = null;
-            
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                    // Check if any buttons are pressed
+        // Handle different touch actions
+        switch (actionMasked) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
+                // New finger touched the screen
+                float x = event.getX(actionIndex);
+                float y = event.getY(actionIndex);
+                
+                // Determine if this touch is on the left or right side of the screen
+                if (x < screenWidth / 2) {
+                    // Left side - handle with joystick
+                    joystick.onTouchEvent(x, y, actionMasked, pointerId);
+                } else {
+                    // Right side - check stunt buttons
                     if (wheelieButton.isPressed(x, y)) {
                         wheelieButton.setPressed(true);
                         touchStunt = "wheelie";
@@ -327,42 +329,94 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                         jumpButton.setPressed(true);
                         touchStunt = "jump";
                     } else if ((gameOver || gameWon) && restartButton.isPressed(x, y)) {
-                        // Restart the game
                         restartGame();
                     } else if (resetButton.isPressed(x, y)) {
-                        // Reset player position
                         player.resetPosition();
                     }
-                    break;
+                }
+                break;
+                
+            case MotionEvent.ACTION_MOVE:
+                // Process all active pointers
+                for (int i = 0; i < event.getPointerCount(); i++) {
+                    int id = event.getPointerId(i);
+                    float touchX = event.getX(i);
+                    float touchY = event.getY(i);
                     
-                case MotionEvent.ACTION_MOVE:
-                    // Check stunt buttons
-                    if (wheelieButton.isPressed(x, y)) {
-                        wheelieButton.setPressed(true);
-                        touchStunt = "wheelie";
+                    // Determine if this touch is on the left or right side
+                    if (touchX < screenWidth / 2) {
+                        // Left side - update joystick
+                        joystick.onTouchEvent(touchX, touchY, MotionEvent.ACTION_MOVE, id);
                     } else {
+                        // Right side - check stunt buttons
+                        if (wheelieButton.isPressed(touchX, touchY)) {
+                            wheelieButton.setPressed(true);
+                            touchStunt = "wheelie";
+                        } else if (jumpButton.isPressed(touchX, touchY)) {
+                            jumpButton.setPressed(true);
+                            touchStunt = "jump";
+                        }
+                    }
+                }
+                break;
+                
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP:
+                // A finger was lifted
+                x = event.getX(actionIndex);
+                
+                if (x < screenWidth / 2) {
+                    // Left side - handle with joystick
+                    joystick.onTouchEvent(x, event.getY(actionIndex),
+                                         actionMasked, pointerId);
+                } else {
+                    // Only reset stunt buttons if no other fingers are pressing them
+                    boolean otherFingerOnWheelieButton = false;
+                    boolean otherFingerOnJumpButton = false;
+                    
+                    for (int i = 0; i < event.getPointerCount(); i++) {
+                        if (i != actionIndex) { // Skip the finger that was lifted
+                            float otherX = event.getX(i);
+                            float otherY = event.getY(i);
+                            
+                            if (otherX >= screenWidth / 2) { // Right side only
+                                if (wheelieButton.isPressed(otherX, otherY)) {
+                                    otherFingerOnWheelieButton = true;
+                                }
+                                if (jumpButton.isPressed(otherX, otherY)) {
+                                    otherFingerOnJumpButton = true;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Only reset buttons if no other fingers are pressing them
+                    if (!otherFingerOnWheelieButton) {
                         wheelieButton.setPressed(false);
                         if (touchStunt == "wheelie") touchStunt = null;
                     }
                     
-                    if (jumpButton.isPressed(x, y)) {
-                        jumpButton.setPressed(true);
-                        touchStunt = "jump";
-                    } else {
+                    if (!otherFingerOnJumpButton) {
                         jumpButton.setPressed(false);
                         if (touchStunt == "jump") touchStunt = null;
                     }
-                    break;
-                    
-                case MotionEvent.ACTION_UP:
-                    // Reset stunt button states
-                    wheelieButton.setPressed(false);
-                    jumpButton.setPressed(false);
-                    
-                    // Reset stunt input
-                    touchStunt = null;
-                    break;
-            }
+                }
+                break;
+                
+            case MotionEvent.ACTION_CANCEL:
+                // Reset all touch input
+                joystick.onTouchEvent(0, 0, MotionEvent.ACTION_CANCEL, 0);
+                wheelieButton.setPressed(false);
+                jumpButton.setPressed(false);
+                touchStunt = null;
+                break;
+        }
+        
+        // Update direction from joystick
+        if (joystick.isActive()) {
+            touchDirection = joystick.getDirection();
+        } else {
+            touchDirection = null;
         }
         
         return true;
@@ -401,13 +455,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             // Update player
             player.update();
             
-            // Move player based on input
+            // Handle movement (left hand)
             if (joystick.isActive() && joystick.isMoving()) {
                 // Use continuous joystick movement
                 player.moveWithJoystick(joystick.getHorizontalMovement(), joystick.getVerticalMovement());
-            } else if (touchDirection != null || touchStunt != null) {
+            } else if (touchDirection != null) {
                 // Fallback to discrete direction movement
-                player.move(touchDirection, touchStunt);
+                player.moveWithDirection(touchDirection);
+            }
+            
+            // Handle stunts separately (right hand)
+            if (touchStunt != null) {
+                player.performStunt(touchStunt);
             }
             
             // Update obstacles

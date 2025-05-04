@@ -277,7 +277,22 @@ public class Player {
         collisionRect.set(x, (int)(y + suspensionOffset), x + width, (int)(y + height + suspensionOffset));
     }
     
+    /**
+     * Legacy method for backward compatibility
+     * Handles both movement and stunts
+     */
     public void move(String direction, String stunt) {
+        // Handle movement
+        moveWithDirection(direction);
+        
+        // Handle stunts
+        performStunt(stunt);
+    }
+    
+    /**
+     * Handles directional movement based on string direction
+     */
+    public void moveWithDirection(String direction) {
         // Handle player movement
         if (direction != null) {
             if ("left".equals(direction)) {
@@ -310,7 +325,14 @@ public class Player {
             targetLeanAngle = 0;
         }
         
-        // Handle stunts
+        // Update collision rectangle - adjust for suspension
+        updateCollisionRect();
+    }
+    
+    /**
+     * Handles stunt execution
+     */
+    public void performStunt(String stunt) {
         if (stunt != null) {
             if ("wheelie".equals(stunt)) {
                 startStunt("wheelie");
@@ -323,6 +345,13 @@ public class Player {
         }
         
         // Update collision rectangle - adjust for suspension
+        updateCollisionRect();
+    }
+    
+    /**
+     * Helper method to update collision rectangle
+     */
+    private void updateCollisionRect() {
         collisionRect.set(x, (int)(y + suspensionOffset), x + width, (int)(y + height + suspensionOffset));
     }
     
@@ -418,8 +447,8 @@ public class Player {
         x = Math.max(roadLeftBoundary, Math.min(roadRightBoundary - width, x));
         y = Math.max(roadTopBoundary, Math.min(roadBottomBoundary - height, y));
         
-        // Update collision rectangle - adjust for suspension
-        collisionRect.set(x, (int)(y + suspensionOffset), x + width, (int)(y + height + suspensionOffset));
+        // Update collision rectangle
+        updateCollisionRect();
     }
     
     // Method to reset position if bike gets stuck

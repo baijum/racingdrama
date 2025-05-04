@@ -29,6 +29,9 @@ public class VirtualJoystick {
     // Movement threshold (minimum distance to register movement)
     private float movementThreshold;
     
+    // Multi-touch support
+    private int activePointerId = -1;
+    
     public VirtualJoystick(int baseX, int baseY, int baseRadius) {
         this.baseX = baseX;
         this.baseY = baseY;
@@ -84,28 +87,43 @@ public class VirtualJoystick {
         canvas.drawCircle(stickX, stickY, stickRadius, borderPaint);
     }
     
+    /**
+     * Legacy method for backward compatibility
+     */
     public boolean onTouchEvent(float touchX, float touchY, int action) {
+        return onTouchEvent(touchX, touchY, action, 0);
+    }
+    
+    /**
+     * Handle touch events with pointer ID tracking for multi-touch support
+     */
+    public boolean onTouchEvent(float touchX, float touchY, int action, int pointerId) {
         switch (action) {
             case android.view.MotionEvent.ACTION_DOWN:
+            case android.view.MotionEvent.ACTION_POINTER_DOWN:
                 // Check if touch is within the base circle
                 float touchDistance = distance(baseX, baseY, touchX, touchY);
                 if (touchDistance <= baseRadius) {
                     isActive = true;
+                    activePointerId = pointerId;
                     updateStickPosition(touchX, touchY);
                     return true;
                 }
                 return false;
                 
             case android.view.MotionEvent.ACTION_MOVE:
-                if (isActive) {
+                if (isActive && (activePointerId == pointerId || activePointerId == -1)) {
                     updateStickPosition(touchX, touchY);
                     return true;
                 }
                 return false;
                 
             case android.view.MotionEvent.ACTION_UP:
-                if (isActive) {
+            case android.view.MotionEvent.ACTION_POINTER_UP:
+            case android.view.MotionEvent.ACTION_CANCEL:
+                if (isActive && (activePointerId == pointerId || activePointerId == -1)) {
                     isActive = false;
+                    activePointerId = -1;
                     resetStick();
                     return true;
                 }
