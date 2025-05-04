@@ -224,7 +224,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         int buttonMargin = 20;
         int buttonAlpha = 150;
         
-        // D-pad controls for movement
+        // D-pad controls for movement - all same size for consistency
         leftButton = new TouchButton(
                 buttonMargin,
                 screenHeight - buttonSize - buttonMargin,
@@ -234,19 +234,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 Color.argb(buttonAlpha, 200, 200, 200),
                 Color.BLACK
         );
-        
         rightButton = new TouchButton(
-                buttonMargin * 3 + buttonSize * 2,
+                buttonMargin * 2 + buttonSize * 2 + buttonMargin,  // Positioned with a small gap from down button
                 screenHeight - buttonSize - buttonMargin,
-                buttonSize * 2,  // Make the button wider
+                buttonSize,
                 buttonSize,
                 "→",
-                Color.argb(buttonAlpha, 255, 100, 100),  // Make it red to stand out
+                Color.argb(buttonAlpha, 255, 100, 100),  // Keep the red color to stand out
                 Color.BLACK
         );
         
         upButton = new TouchButton(
-                buttonMargin + buttonSize,
+                buttonMargin * 2 + buttonSize,
                 screenHeight - buttonSize * 2 - buttonMargin,
                 buttonSize,
                 buttonSize,
@@ -256,7 +255,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         );
         
         downButton = new TouchButton(
-                buttonMargin + buttonSize,
+                buttonMargin * 2 + buttonSize,
                 screenHeight - buttonSize - buttonMargin,
                 buttonSize,
                 buttonSize,

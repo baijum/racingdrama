@@ -50,7 +50,17 @@ public class TouchButton {
         
         // Set text paint properties
         textPaint.setColor(textColor);
-        textPaint.setTextSize(30);
+        
+        // Adjust text size based on button size for better proportions
+        // Make arrows larger and more visible
+        if (text.equals("←") || text.equals("→") || text.equals("↑") || text.equals("↓")) {
+            // For arrow buttons, use a size proportional to the button dimensions
+            textPaint.setTextSize(Math.min(width, height) * 0.6f);
+        } else {
+            // For other buttons (like "W", "J", "Reset", etc.)
+            textPaint.setTextSize(Math.min(width, height) * 0.4f);
+        }
+        
         textPaint.setTypeface(Typeface.DEFAULT_BOLD);
         textPaint.setTextAlign(Paint.Align.CENTER);
         
