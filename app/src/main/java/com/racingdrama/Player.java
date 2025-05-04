@@ -293,6 +293,24 @@ public class Player {
         return roadBottomBoundary;
     }
     
+    // Method for continuous joystick movement
+    public void moveWithJoystick(float horizontalInput, float verticalInput) {
+        // Scale the input by speed
+        int deltaX = (int)(horizontalInput * speed);
+        int deltaY = (int)(verticalInput * speed);
+        
+        // Apply movement
+        x += deltaX;
+        y += deltaY;
+        
+        // Ensure the bike stays within road boundaries
+        x = Math.max(roadLeftBoundary, Math.min(roadRightBoundary - width, x));
+        y = Math.max(roadTopBoundary, Math.min(roadBottomBoundary - height, y));
+        
+        // Update collision rectangle
+        collisionRect.set(x, y, x + width, y + height);
+    }
+    
     // Method to reset position if bike gets stuck
     public void resetPosition() {
         // Reset to a safe position within the road boundaries

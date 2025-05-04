@@ -47,14 +47,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private int stuntBonusTimer = 0;
     
     // Touch controls
-    private TouchButton leftButton;
-    private TouchButton rightButton;
-    private TouchButton upButton;
-    private TouchButton downButton;
+    private VirtualJoystick joystick; // Virtual joystick for movement
     private TouchButton wheelieButton;
     private TouchButton jumpButton;
     private TouchButton restartButton;
-    private TouchButton resetButton; // New reset button
+    private TouchButton resetButton;
     
     // Touch input state
     private String touchDirection = null;
@@ -224,45 +221,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         int buttonMargin = 20;
         int buttonAlpha = 150;
         
-        // D-pad controls for movement - all same size for consistency
-        leftButton = new TouchButton(
-                buttonMargin,
-                screenHeight - buttonSize - buttonMargin,
-                buttonSize,
-                buttonSize,
-                "←",
-                Color.argb(buttonAlpha, 200, 200, 200),
-                Color.BLACK
-        );
-        rightButton = new TouchButton(
-                buttonMargin * 2 + buttonSize * 2 + buttonMargin,  // Positioned with a small gap from down button
-                screenHeight - buttonSize - buttonMargin,
-                buttonSize,
-                buttonSize,
-                "→",
-                Color.argb(buttonAlpha, 255, 100, 100),  // Keep the red color to stand out
-                Color.BLACK
-        );
-        
-        upButton = new TouchButton(
-                buttonMargin * 2 + buttonSize,
-                screenHeight - buttonSize * 2 - buttonMargin,
-                buttonSize,
-                buttonSize,
-                "↑",
-                Color.argb(buttonAlpha, 200, 200, 200),
-                Color.BLACK
-        );
-        
-        downButton = new TouchButton(
-                buttonMargin * 2 + buttonSize,
-                screenHeight - buttonSize - buttonMargin,
-                buttonSize,
-                buttonSize,
-                "↓",
-                Color.argb(buttonAlpha, 200, 200, 200),
-                Color.BLACK
-        );
+        // Create virtual joystick for movement
+        int joystickRadius = 120; // Larger radius for better control
+        int joystickX = joystickRadius + buttonMargin;
+        int joystickY = screenHeight - joystickRadius - buttonMargin;
+        joystick = new VirtualJoystick(joystickX, joystickY, joystickRadius);
         
         // Stunt buttons
         wheelieButton = new TouchButton(
@@ -344,108 +307,62 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         float x = event.getX();
         float y = event.getY();
         
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                // Check if any buttons are pressed
-                if (leftButton.isPressed(x, y)) {
-                    leftButton.setPressed(true);
-                    touchDirection = "left";
-                } else if (rightButton.isPressed(x, y)) {
-                    rightButton.setPressed(true);
-                    touchDirection = "right";
-                } else if (upButton.isPressed(x, y)) {
-                    upButton.setPressed(true);
-                    touchDirection = "up";
-                } else if (downButton.isPressed(x, y)) {
-                    downButton.setPressed(true);
-                    touchDirection = "down";
-                } else if (wheelieButton.isPressed(x, y)) {
-                    wheelieButton.setPressed(true);
-                    touchStunt = "wheelie";
-                } else if (jumpButton.isPressed(x, y)) {
-                    jumpButton.setPressed(true);
-                    touchStunt = "jump";
-                } else if ((gameOver || gameWon) && restartButton.isPressed(x, y)) {
-                    // Restart the game
-                    restartGame();
-                } else if (resetButton.isPressed(x, y)) {
-                    // Reset player position
-                    player.resetPosition();
-                }
-                break;
-                
-            case MotionEvent.ACTION_MOVE:
-                // Don't reset touch inputs here, check each button individually
-                
-                // Check each button and update state
-                boolean anyButtonPressed = false;
-                
-                if (rightButton.isPressed(x, y)) {
-                    rightButton.setPressed(true);
-                    touchDirection = "right";
-                    anyButtonPressed = true;
-                } else {
-                    rightButton.setPressed(false);
-                }
-                
-                if (!anyButtonPressed && leftButton.isPressed(x, y)) {
-                    leftButton.setPressed(true);
-                    touchDirection = "left";
-                    anyButtonPressed = true;
-                } else {
-                    leftButton.setPressed(false);
-                }
-                
-                if (!anyButtonPressed && upButton.isPressed(x, y)) {
-                    upButton.setPressed(true);
-                    touchDirection = "up";
-                    anyButtonPressed = true;
-                } else {
-                    upButton.setPressed(false);
-                }
-                
-                if (!anyButtonPressed && downButton.isPressed(x, y)) {
-                    downButton.setPressed(true);
-                    touchDirection = "down";
-                    anyButtonPressed = true;
-                } else {
-                    downButton.setPressed(false);
-                }
-                
-                if (wheelieButton.isPressed(x, y)) {
-                    wheelieButton.setPressed(true);
-                    touchStunt = "wheelie";
-                } else {
+        // First, check if the joystick handles this touch event
+        boolean joystickHandled = joystick.onTouchEvent(x, y, action);
+        
+        // If joystick is active, get the direction from it
+        if (joystick.isActive()) {
+            touchDirection = joystick.getDirection();
+        } else if (!joystickHandled) {
+            // If joystick didn't handle the touch, check other buttons
+            touchDirection = null;
+            
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    // Check if any buttons are pressed
+                    if (wheelieButton.isPressed(x, y)) {
+                        wheelieButton.setPressed(true);
+                        touchStunt = "wheelie";
+                    } else if (jumpButton.isPressed(x, y)) {
+                        jumpButton.setPressed(true);
+                        touchStunt = "jump";
+                    } else if ((gameOver || gameWon) && restartButton.isPressed(x, y)) {
+                        // Restart the game
+                        restartGame();
+                    } else if (resetButton.isPressed(x, y)) {
+                        // Reset player position
+                        player.resetPosition();
+                    }
+                    break;
+                    
+                case MotionEvent.ACTION_MOVE:
+                    // Check stunt buttons
+                    if (wheelieButton.isPressed(x, y)) {
+                        wheelieButton.setPressed(true);
+                        touchStunt = "wheelie";
+                    } else {
+                        wheelieButton.setPressed(false);
+                        if (touchStunt == "wheelie") touchStunt = null;
+                    }
+                    
+                    if (jumpButton.isPressed(x, y)) {
+                        jumpButton.setPressed(true);
+                        touchStunt = "jump";
+                    } else {
+                        jumpButton.setPressed(false);
+                        if (touchStunt == "jump") touchStunt = null;
+                    }
+                    break;
+                    
+                case MotionEvent.ACTION_UP:
+                    // Reset stunt button states
                     wheelieButton.setPressed(false);
-                }
-                
-                if (jumpButton.isPressed(x, y)) {
-                    jumpButton.setPressed(true);
-                    touchStunt = "jump";
-                } else {
                     jumpButton.setPressed(false);
-                }
-                
-                // If no button is pressed, reset touch inputs
-                if (!anyButtonPressed && touchDirection != null) {
-                    touchDirection = null;
-                }
-                
-                break;
-                
-            case MotionEvent.ACTION_UP:
-                // Reset all button states
-                leftButton.setPressed(false);
-                rightButton.setPressed(false);
-                upButton.setPressed(false);
-                downButton.setPressed(false);
-                wheelieButton.setPressed(false);
-                jumpButton.setPressed(false);
-                
-                // Reset touch inputs
-                touchDirection = null;
-                touchStunt = null;
-                break;
+                    
+                    // Reset stunt input
+                    touchStunt = null;
+                    break;
+            }
         }
         
         return true;
@@ -484,8 +401,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             // Update player
             player.update();
             
-            // Move player based on touch input
-            if (touchDirection != null || touchStunt != null) {
+            // Move player based on input
+            if (joystick.isActive() && joystick.isMoving()) {
+                // Use continuous joystick movement
+                player.moveWithJoystick(joystick.getHorizontalMovement(), joystick.getVerticalMovement());
+            } else if (touchDirection != null || touchStunt != null) {
+                // Fallback to discrete direction movement
                 player.move(touchDirection, touchStunt);
             }
             
@@ -611,11 +532,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             
             // Draw touch controls
             if (!gameOver && !gameWon) {
-                // Draw movement buttons
-                leftButton.draw(canvas);
-                rightButton.draw(canvas);
-                upButton.draw(canvas);
-                downButton.draw(canvas);
+                // Draw virtual joystick
+                joystick.draw(canvas);
                 
                 // Draw stunt buttons
                 wheelieButton.draw(canvas);
@@ -633,6 +551,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                         jumpButton.getY() - 10, hintPaint);
                 canvas.drawText("Reset Position", resetButton.getX() + resetButton.getWidth() / 2 - 50,
                         resetButton.getY() - 10, hintPaint);
+                
+                // Draw joystick hint
+                canvas.drawText("Move", joystick.getBaseX(), joystick.getBaseY() - joystick.getBaseRadius() - 10, hintPaint);
             }
             
             // Draw game over message if game is over
