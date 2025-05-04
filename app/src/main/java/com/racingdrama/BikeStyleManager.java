@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import androidx.core.content.ContextCompat;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 /**
  * Manages different bike styles and provides methods to load bike images
@@ -36,7 +38,12 @@ public class BikeStyleManager {
     private Bitmap bikeWheelieImg;
     private Bitmap bikeJumpImg;
     
-    // Base bike images (unmodified)
+    // Base bike vector drawables (unmodified)
+    private VectorDrawableCompat baseBikeNormalVector;
+    private VectorDrawableCompat baseBikeWheelieVector;
+    private VectorDrawableCompat baseBikeJumpVector;
+    
+    // Base bike images (bitmap versions of vectors)
     private Bitmap baseBikeNormal;
     private Bitmap baseBikeWheelie;
     private Bitmap baseBikeJump;
@@ -76,19 +83,49 @@ public class BikeStyleManager {
     }
     
     /**
-     * Loads the base bike images from resources
+     * Loads the base bike images from vector drawable resources
      */
     private void loadBaseImages() {
-        Resources resources = context.getResources();
-        String packageName = context.getPackageName();
+        // Load vector drawables
+        baseBikeNormalVector = VectorDrawableCompat.create(
+                context.getResources(), 
+                context.getResources().getIdentifier("bike_normal", "drawable", context.getPackageName()),
+                null);
+        baseBikeWheelieVector = VectorDrawableCompat.create(
+                context.getResources(), 
+                context.getResources().getIdentifier("bike_wheelie", "drawable", context.getPackageName()),
+                null);
+        baseBikeJumpVector = VectorDrawableCompat.create(
+                context.getResources(), 
+                context.getResources().getIdentifier("bike_jump", "drawable", context.getPackageName()),
+                null);
         
-        // Load the base images
-        baseBikeNormal = BitmapFactory.decodeResource(resources, 
-                resources.getIdentifier("bike_normal", "drawable", packageName));
-        baseBikeWheelie = BitmapFactory.decodeResource(resources, 
-                resources.getIdentifier("bike_wheelie", "drawable", packageName));
-        baseBikeJump = BitmapFactory.decodeResource(resources, 
-                resources.getIdentifier("bike_jump", "drawable", packageName));
+        // Convert vector drawables to bitmaps
+        baseBikeNormal = vectorToBitmap(baseBikeNormalVector);
+        baseBikeWheelie = vectorToBitmap(baseBikeWheelieVector);
+        baseBikeJump = vectorToBitmap(baseBikeJumpVector);
+    }
+    
+    /**
+     * Converts a vector drawable to bitmap
+     * @param vectorDrawable The vector drawable to convert
+     * @return Bitmap representation of the vector drawable
+     */
+    private Bitmap vectorToBitmap(VectorDrawableCompat vectorDrawable) {
+        if (vectorDrawable == null) {
+            return null;
+        }
+        
+        Bitmap bitmap = Bitmap.createBitmap(
+                vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888);
+        
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        vectorDrawable.draw(canvas);
+        
+        return bitmap;
     }
     
     /**

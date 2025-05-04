@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+
+    <!-- Star 1 -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M40,40 L45,55 L60,55 L50,65 L55,80 L40,70 L25,80 L30,65 L20,55 L35,55 Z" />
+
+    <!-- Star 2 -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M100,20 L105,35 L120,35 L110,45 L115,60 L100,50 L85,60 L90,45 L80,35 L95,35 Z" />
+
+    <!-- Star 3 -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M160,40 L165,55 L180,55 L170,65 L175,80 L160,70 L145,80 L150,65 L140,55 L155,55 Z" />
+
+    <!-- Star 4 -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M70,80 L75,95 L90,95 L80,105 L85,120 L70,110 L55,120 L60,105 L50,95 L65,95 Z" />
+
+    <!-- Star 5 -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M130,80 L135,95 L150,95 L140,105 L145,120 L130,110 L115,120 L120,105 L110,95 L125,95 Z" />
+
+    <!-- Sparkle lines around stars -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M40,25 L40,35 M25,40 L35,40 M45,40 L55,40 M40,45 L40,55" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M100,5 L100,15 M85,20 L95,20 M105,20 L115,20 M100,25 L100,35" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M160,25 L160,35 M145,40 L155,40 M165,40 L175,40 M160,45 L160,55" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M70,65 L70,75 M55,80 L65,80 M75,80 L85,80 M70,85 L70,95" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M130,65 L130,75 M115,80 L125,80 M135,80 L145,80 M130,85 L130,95" />
+</vector>

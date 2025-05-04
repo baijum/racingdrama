@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="80dp"
+    android:viewportWidth="120"
+    android:viewportHeight="80">
+
+    <!-- Oil puddle base -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M20,40 C20,25 40,20 60,20 C80,20 100,25 100,40 C100,55 80,60 60,60 C40,60 20,55 20,40 Z" />
+
+    <!-- Oil slick highlights -->
+    <path
+        android:fillColor="#444444"
+        android:pathData="M30,40 C30,30 45,25 60,25 C75,25 90,30 90,40 C90,50 75,55 60,55 C45,55 30,50 30,40 Z" />
+
+    <!-- Oil rainbow effect (sheen) -->
+    <path
+        android:fillColor="#0000FF"
+        android:pathData="M35,40 C35,33 47,30 60,30 C73,30 85,33 85,40 C85,47 73,50 60,50 C47,50 35,47 35,40 Z"
+        android:fillAlpha="0.2" />
+
+    <path
+        android:fillColor="#00FF00"
+        android:pathData="M40,40 C40,35 50,33 60,33 C70,33 80,35 80,40 C80,45 70,47 60,47 C50,47 40,45 40,40 Z"
+        android:fillAlpha="0.2" />
+
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M45,40 C45,37 52,35 60,35 C68,35 75,37 75,40 C75,43 68,45 60,45 C52,45 45,43 45,40 Z"
+        android:fillAlpha="0.2" />
+
+    <!-- Oil drops around the puddle -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M15,35 C15,32 18,32 18,35 C18,38 15,38 15,35 Z" />
+
+    <path
+        android:fillColor="#333333"
+        android:pathData="M12,45 C12,43 14,43 14,45 C14,47 12,47 12,45 Z" />
+
+    <path
+        android:fillColor="#333333"
+        android:pathData="M105,35 C105,32 108,32 108,35 C108,38 105,38 105,35 Z" />
+
+    <path
+        android:fillColor="#333333"
+        android:pathData="M108,45 C108,43 110,43 110,45 C110,47 108,47 108,45 Z" />
+
+    <path
+        android:fillColor="#333333"
+        android:pathData="M50,15 C50,13 53,13 53,15 C53,17 50,17 50,15 Z" />
+
+    <path
+        android:fillColor="#333333"
+        android:pathData="M70,15 C70,13 73,13 73,15 C73,17 70,17 70,15 Z" />
+</vector>

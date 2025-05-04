@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="120dp"
+    android:viewportWidth="240"
+    android:viewportHeight="120">
+
+    <!-- Car body -->
+    <path
+        android:fillColor="#CC0000"
+        android:pathData="M40,80 L40,60 C40,50 60,40 100,40 L140,40 C180,40 200,50 200,60 L200,80 Z" />
+
+    <!-- Car roof -->
+    <path
+        android:fillColor="#AA0000"
+        android:pathData="M80,40 L100,20 L140,20 L160,40 Z" />
+
+    <!-- Windows -->
+    <path
+        android:fillColor="#AADDFF"
+        android:pathData="M85,40 L105,25 L135,25 L155,40 Z" />
+
+    <!-- Front window divider -->
+    <path
+        android:strokeColor="#333333"
+        android:strokeWidth="2"
+        android:pathData="M120,25 L120,40" />
+
+    <!-- Headlights -->
+    <path
+        android:fillColor="#FFFF99"
+        android:pathData="M40,60 C40,55 45,55 45,60 C45,65 40,65 40,60 Z" />
+    <path
+        android:fillColor="#FFFF99"
+        android:pathData="M40,70 C40,65 45,65 45,70 C45,75 40,75 40,70 Z" />
+
+    <!-- Taillights -->
+    <path
+        android:fillColor="#FF3333"
+        android:pathData="M200,60 C200,55 195,55 195,60 C195,65 200,65 200,60 Z" />
+    <path
+        android:fillColor="#FF3333"
+        android:pathData="M200,70 C200,65 195,65 195,70 C195,75 200,75 200,70 Z" />
+
+    <!-- Front wheel -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M60,80 C60,70 70,70 70,80 C70,90 60,90 60,80 Z" />
+
+    <!-- Rear wheel -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M170,80 C170,70 180,70 180,80 C180,90 170,90 170,80 Z" />
+
+    <!-- Wheel rims -->
+    <path
+        android:fillColor="#CCCCCC"
+        android:pathData="M65,80 C65,75 67,75 67,80 C67,85 65,85 65,80 Z" />
+    <path
+        android:fillColor="#CCCCCC"
+        android:pathData="M175,80 C175,75 177,75 177,80 C177,85 175,85 175,80 Z" />
+
+    <!-- Door lines -->
+    <path
+        android:strokeColor="#990000"
+        android:strokeWidth="2"
+        android:pathData="M100,40 L100,80 M140,40 L140,80" />
+
+    <!-- Bumpers -->
+    <path
+        android:fillColor="#999999"
+        android:pathData="M35,75 L45,75 L45,85 L35,85 Z" />
+    <path
+        android:fillColor="#999999"
+        android:pathData="M195,75 L205,75 L205,85 L195,85 Z" />
+</vector>

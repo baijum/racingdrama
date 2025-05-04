@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+
+    <!-- Bike frame -->
+    <path
+        android:fillColor="#444444"
+        android:pathData="M80,70 L110,40 L140,70 L120,90 Z" />
+
+    <!-- Handlebars -->
+    <path
+        android:fillColor="#555555"
+        android:pathData="M110,40 L100,30 M110,40 L120,30" />
+
+    <!-- Front wheel -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#333333"
+        android:strokeWidth="5"
+        android:pathData="M80,70 C80,53 93,40 110,40 C127,40 140,53 140,70 C140,87 127,100 110,100 C93,100 80,87 80,70 Z" />
+
+    <!-- Back wheel -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#333333"
+        android:strokeWidth="5"
+        android:pathData="M140,70 C140,53 153,40 170,40 C187,40 200,53 200,70 C200,87 187,100 170,100 C153,100 140,87 140,70 Z" />
+
+    <!-- Spokes front wheel -->
+    <path
+        android:strokeColor="#777777"
+        android:strokeWidth="1"
+        android:pathData="M110,70 L110,40 M110,70 L110,100 M110,70 L80,70 M110,70 L140,70" />
+
+    <!-- Spokes back wheel -->
+    <path
+        android:strokeColor="#777777"
+        android:strokeWidth="1"
+        android:pathData="M170,70 L170,40 M170,70 L170,100 M170,70 L140,70 M170,70 L200,70" />
+
+    <!-- Seat -->
+    <path
+        android:fillColor="#222222"
+        android:pathData="M120,40 L130,40 L130,35 L120,35 Z" />
+
+    <!-- Rider body -->
+    <path
+        android:fillColor="#3366CC"
+        android:pathData="M120,35 C125,25 130,20 135,15 C140,20 145,25 145,35 C145,45 135,55 125,55 C115,55 115,45 120,35 Z" />
+
+    <!-- Rider head -->
+    <path
+        android:fillColor="#FFCC99"
+        android:pathData="M135,15 C140,10 145,10 150,15 C155,20 155,25 150,30 C145,35 140,35 135,30 C130,25 130,20 135,15 Z" />
+
+    <!-- Rider helmet -->
+    <path
+        android:fillColor="#FF3333"
+        android:pathData="M135,15 C140,10 145,10 150,15 C155,20 155,22 150,25 C145,28 140,28 135,25 C130,22 130,20 135,15 Z" />
+
+    <!-- Rider arms -->
+    <path
+        android:strokeColor="#3366CC"
+        android:strokeWidth="5"
+        android:pathData="M125,35 L110,40 M145,35 L130,40" />
+
+    <!-- Rider legs -->
+    <path
+        android:strokeColor="#000000"
+        android:strokeWidth="5"
+        android:pathData="M125,55 L110,70 M125,55 L140,70" />
+</vector>

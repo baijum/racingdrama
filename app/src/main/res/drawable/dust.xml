@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="150dp"
+    android:height="100dp"
+    android:viewportWidth="150"
+    android:viewportHeight="100">
+
+    <!-- Dust cloud particles -->
+    <path
+        android:fillColor="#CCCCCC"
+        android:pathData="M30,50 C20,40 30,30 40,35 C45,25 60,25 65,35 C75,25 90,30 90,45 C100,35 115,40 110,55 C120,50 130,60 120,70 C130,75 125,85 115,85 C120,95 105,100 95,90 C90,100 75,95 75,85 C65,95 50,90 55,80 C45,85 35,75 40,65 C30,70 20,60 30,50 Z" />
+
+    <!-- Smaller dust particles -->
+    <path
+        android:fillColor="#DDDDDD"
+        android:pathData="M25,60 C20,55 25,50 30,52 C32,47 40,47 42,52 C47,47 55,50 55,57 C60,52 67,55 65,62 C70,60 75,65 70,70 C75,72 72,77 67,77 C70,82 62,85 57,80 C55,85 47,82 47,77 C42,82 35,80 37,75 C32,77 27,72 30,67 C25,70 20,65 25,60 Z" />
+
+    <!-- Dust motion lines -->
+    <path
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="2"
+        android:pathData="M10,50 L20,45 M5,60 L15,55 M10,70 L20,65 M130,45 L140,40 M135,55 L145,50 M130,65 L140,60" />
+</vector>

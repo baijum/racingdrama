@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Explosion outer -->
+    <path
+        android:fillColor="#FF6600"
+        android:pathData="M100,100 L130,50 L150,90 L190,80 L160,120 L200,150 L150,150 L160,200 L100,160 L40,200 L50,150 L0,150 L40,120 L10,80 L50,90 L70,50 Z" />
+
+    <!-- Explosion inner -->
+    <path
+        android:fillColor="#FFCC00"
+        android:pathData="M100,100 L120,70 L135,95 L160,90 L140,115 L170,135 L135,135 L145,165 L100,140 L55,165 L65,135 L30,135 L60,115 L40,90 L65,95 L80,70 Z" />
+
+    <!-- Explosion center -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,100 L110,85 L120,98 L135,95 L125,110 L140,120 L120,120 L125,140 L100,125 L75,140 L80,120 L60,120 L75,110 L65,95 L80,98 L90,85 Z" />
+
+    <!-- Impact lines -->
+    <path
+        android:strokeColor="#000000"
+        android:strokeWidth="3"
+        android:pathData="M20,20 L40,40 M180,20 L160,40 M20,180 L40,160 M180,180 L160,160" />
+
+    <!-- "POW" text -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70,70 L80,60 L90,70 L100,60 L110,70 L120,60 L130,70 L130,90 L70,90 Z" />
+    
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M75,65 L80,60 L85,65 L90,60 L95,65 L100,60 L105,65 L110,60 L115,65 L120,60 L125,65 L125,85 L75,85 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M85,70 L85,80 M100,70 L100,80 M115,70 L115,80" />
+</vector>

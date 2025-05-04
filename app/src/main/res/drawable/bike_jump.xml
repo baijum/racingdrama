@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+
+    <!-- Bike frame (angled for jump) -->
+    <path
+        android:fillColor="#444444"
+        android:pathData="M80,50 L110,30 L140,50 L120,70 Z" />
+
+    <!-- Handlebars (angled) -->
+    <path
+        android:fillColor="#555555"
+        android:pathData="M110,30 L100,20 M110,30 L120,20" />
+
+    <!-- Front wheel (in air) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#333333"
+        android:strokeWidth="5"
+        android:pathData="M80,50 C80,33 93,20 110,20 C127,20 140,33 140,50 C140,67 127,80 110,80 C93,80 80,67 80,50 Z" />
+
+    <!-- Back wheel (in air) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#333333"
+        android:strokeWidth="5"
+        android:pathData="M140,50 C140,33 153,20 170,20 C187,20 200,33 200,50 C200,67 187,80 170,80 C153,80 140,67 140,50 Z" />
+
+    <!-- Spokes front wheel -->
+    <path
+        android:strokeColor="#777777"
+        android:strokeWidth="1"
+        android:pathData="M110,50 L110,20 M110,50 L110,80 M110,50 L80,50 M110,50 L140,50" />
+
+    <!-- Spokes back wheel -->
+    <path
+        android:strokeColor="#777777"
+        android:strokeWidth="1"
+        android:pathData="M170,50 L170,20 M170,50 L170,80 M170,50 L140,50 M170,50 L200,50" />
+
+    <!-- Seat -->
+    <path
+        android:fillColor="#222222"
+        android:pathData="M120,30 L130,30 L130,25 L120,25 Z" />
+
+    <!-- Rider body (crouched for jump) -->
+    <path
+        android:fillColor="#3366CC"
+        android:pathData="M120,25 C125,15 130,10 135,5 C140,10 145,15 145,25 C145,35 135,45 125,45 C115,45 115,35 120,25 Z" />
+
+    <!-- Rider head -->
+    <path
+        android:fillColor="#FFCC99"
+        android:pathData="M135,5 C140,0 145,0 150,5 C155,10 155,15 150,20 C145,25 140,25 135,20 C130,15 130,10 135,5 Z" />
+
+    <!-- Rider helmet -->
+    <path
+        android:fillColor="#FF3333"
+        android:pathData="M135,5 C140,0 145,0 150,5 C155,10 155,12 150,15 C145,18 140,18 135,15 C130,12 130,10 135,5 Z" />
+
+    <!-- Rider arms (extended for jump) -->
+    <path
+        android:strokeColor="#3366CC"
+        android:strokeWidth="5"
+        android:pathData="M125,25 L110,30 M145,25 L130,30" />
+
+    <!-- Rider legs (crouched for jump) -->
+    <path
+        android:strokeColor="#000000"
+        android:strokeWidth="5"
+        android:pathData="M125,45 L110,50 M125,45 L140,50" />
+    
+    <!-- Motion lines to indicate jump -->
+    <path
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="2"
+        android:pathData="M70,80 L90,60 M150,60 L170,80 M110,90 L110,80 M170,90 L170,80" />
+</vector>

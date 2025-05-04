@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="100dp"
+    android:viewportWidth="120"
+    android:viewportHeight="100">
+
+    <!-- Main rock shape -->
+    <path
+        android:fillColor="#777777"
+        android:pathData="M20,80 L30,50 L45,40 L70,35 L90,45 L100,70 L90,85 L60,90 L30,85 Z" />
+
+    <!-- Rock highlights -->
+    <path
+        android:fillColor="#999999"
+        android:pathData="M30,50 L45,40 L60,42 L70,50 L60,65 L40,70 Z" />
+
+    <!-- Rock shadows -->
+    <path
+        android:fillColor="#555555"
+        android:pathData="M70,35 L90,45 L100,70 L80,60 L75,45 Z" />
+
+    <!-- Rock cracks -->
+    <path
+        android:strokeColor="#444444"
+        android:strokeWidth="1"
+        android:pathData="M40,55 L60,50 M70,55 L80,70 M50,70 L60,80" />
+
+    <!-- Small rock pieces -->
+    <path
+        android:fillColor="#777777"
+        android:pathData="M15,75 L20,70 L25,75 L20,80 Z" />
+
+    <path
+        android:fillColor="#777777"
+        android:pathData="M105,75 L110,70 L115,75 L110,80 Z" />
+
+    <path
+        android:fillColor="#777777"
+        android:pathData="M40,85 L45,82 L50,85 L45,88 Z" />
+</vector>

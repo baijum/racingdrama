@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="100dp"
+    android:viewportWidth="200"
+    android:viewportHeight="100">
+
+    <!-- Finish line flag pattern -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M0,0 L25,0 L25,25 L0,25 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25,0 L50,0 L50,25 L25,25 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M50,0 L75,0 L75,25 L50,25 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M75,0 L100,0 L100,25 L75,25 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M100,0 L125,0 L125,25 L100,25 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M125,0 L150,0 L150,25 L125,25 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M150,0 L175,0 L175,25 L150,25 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M175,0 L200,0 L200,25 L175,25 Z" />
+    
+    <!-- Row 2 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,25 L25,25 L25,50 L0,50 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M25,25 L50,25 L50,50 L25,50 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,25 L75,25 L75,50 L50,50 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M75,25 L100,25 L100,50 L75,50 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,25 L125,25 L125,50 L100,50 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M125,25 L150,25 L150,50 L125,50 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M150,25 L175,25 L175,50 L150,50 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M175,25 L200,25 L200,50 L175,50 Z" />
+    
+    <!-- Row 3 -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M0,50 L25,50 L25,75 L0,75 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25,50 L50,50 L50,75 L25,75 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M50,50 L75,50 L75,75 L50,75 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M75,50 L100,50 L100,75 L75,75 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M100,50 L125,50 L125,75 L100,75 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M125,50 L150,50 L150,75 L125,75 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M150,50 L175,50 L175,75 L150,75 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M175,50 L200,50 L200,75 L175,75 Z" />
+    
+    <!-- Row 4 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,75 L25,75 L25,100 L0,100 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M25,75 L50,75 L50,100 L25,100 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,75 L75,75 L75,100 L50,100 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M75,75 L100,75 L100,100 L75,100 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,75 L125,75 L125,100 L100,100 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M125,75 L150,75 L150,100 L125,100 Z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M150,75 L175,75 L175,100 L150,100 Z" />
+    
+    <path
+        android:fillColor="#000000"
+        android:pathData="M175,75 L200,75 L200,100 L175,100 Z" />
+</vector>

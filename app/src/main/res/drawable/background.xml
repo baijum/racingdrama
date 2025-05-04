@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1080dp"
+    android:height="1920dp"
+    android:viewportWidth="1080"
+    android:viewportHeight="1920">
+
+    <!-- Sky gradient -->
+    <path
+        android:pathData="M0,0h1080v1200H0z"
+        android:fillColor="#87CEEB" />
+
+    <!-- Ground -->
+    <path
+        android:pathData="M0,1200h1080v720H0z"
+        android:fillColor="#8B4513" />
+
+    <!-- Road -->
+    <path
+        android:pathData="M200,1200 L400,1920 L680,1920 L880,1200 z"
+        android:fillColor="#555555" />
+
+    <!-- Road markings (using multiple lines instead of dashed pattern) -->
+    <path
+        android:pathData="M540,1200 L540,1260"
+        android:strokeWidth="10"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M540,1320 L540,1380"
+        android:strokeWidth="10"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M540,1440 L540,1500"
+        android:strokeWidth="10"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M540,1560 L540,1620"
+        android:strokeWidth="10"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M540,1680 L540,1740"
+        android:strokeWidth="10"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M540,1800 L540,1860"
+        android:strokeWidth="10"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- Sun -->
+    <path
+        android:pathData="M800,200 A100,100 0 1,1 800,201 z"
+        android:fillColor="#FFFF00" />
+
+    <!-- Clouds -->
+    <path
+        android:pathData="M200,300 C230,270 280,270 310,300 C340,270 390,270 420,300 C420,330 390,360 360,360 C360,390 330,420 300,420 C270,420 240,390 240,360 C210,360 180,330 180,300 C180,300 170,330 200,300 z"
+        android:fillColor="#FFFFFF" />
+
+    <path
+        android:pathData="M600,250 C630,220 680,220 710,250 C740,220 790,220 820,250 C820,280 790,310 760,310 C760,340 730,370 700,370 C670,370 640,340 640,310 C610,310 580,280 580,250 C580,250 570,280 600,250 z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Hills in background -->
+    <path
+        android:pathData="M0,1100 Q270,900 540,1100 Q810,900 1080,1100 L1080,1200 L0,1200 z"
+        android:fillColor="#228B22" />
+</vector>
