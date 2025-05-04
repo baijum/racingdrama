@@ -54,6 +54,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private TouchButton wheelieButton;
     private TouchButton jumpButton;
     private TouchButton restartButton;
+    private TouchButton resetButton; // New reset button
     
     // Touch input state
     private String touchDirection = null;
@@ -166,9 +167,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private void createObstacles() {
         // Create initial obstacles
         for (int i = 0; i < 5; i++) {
-            int x = random.nextInt(500) + 150; // Keep within road boundaries
-            int y = random.nextInt(550) - 600; // Start above the screen
-            int speed = random.nextInt(4) + 3;  // Speed between 3-7
+            // Get exact road boundaries from Player class
+            int roadLeftBoundary = player.getRoadLeftBoundary();
+            int roadRightBoundary = player.getRoadRightBoundary();
+            
+            // Spread obstacles further apart vertically
+            int y = random.nextInt(800) - 1000; // Start further above the screen and more spread out
+            
+            // Reduce speed range to make obstacles come more slowly
+            int speed = random.nextInt(2) + 2;  // Speed between 2-3 (slower)
+            
             String obstacleType = getRandomObstacleType();
             
             Bitmap obstacleImg;
@@ -193,7 +201,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     break;
             }
             
-            obstacles.add(new Obstacle(obstacleImg, x, y, speed, obstacleType, isHazard));
+            // Ensure obstacles stay completely within road boundaries
+            // Account for obstacle width to prevent it from extending beyond road edges
+            int obstacleWidth = obstacleImg.getWidth();
+            int maxX = roadRightBoundary - obstacleWidth;
+            int minX = roadLeftBoundary;
+            
+            // Generate random x position within safe road boundaries
+            int x = random.nextInt(maxX - minX) + minX;
+            
+            obstacles.add(new Obstacle(obstacleImg, x, y, speed, obstacleType, isHazard, player.getRoadLeftBoundary(), player.getRoadRightBoundary()));
         }
     }
     
@@ -219,12 +236,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         );
         
         rightButton = new TouchButton(
-                buttonMargin * 2 + buttonSize,
+                buttonMargin * 3 + buttonSize * 2,
                 screenHeight - buttonSize - buttonMargin,
-                buttonSize,
+                buttonSize * 2,  // Make the button wider
                 buttonSize,
                 "→",
-                Color.argb(buttonAlpha, 200, 200, 200),
+                Color.argb(buttonAlpha, 255, 100, 100),  // Make it red to stand out
                 Color.BLACK
         );
         
@@ -278,6 +295,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 "Restart",
                 Color.argb(buttonAlpha, 0, 255, 0),
                 Color.BLACK
+        );
+        
+        // Reset position button (always shown)
+        resetButton = new TouchButton(
+                screenWidth - buttonSize * 2 - buttonMargin,
+                buttonMargin,
+                buttonSize * 2,
+                buttonSize,
+                "Reset",
+                Color.argb(buttonAlpha, 255, 0, 0),
+                Color.WHITE
         );
     }
     
@@ -341,44 +369,69 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 } else if ((gameOver || gameWon) && restartButton.isPressed(x, y)) {
                     // Restart the game
                     restartGame();
+                } else if (resetButton.isPressed(x, y)) {
+                    // Reset player position
+                    player.resetPosition();
                 }
                 break;
                 
             case MotionEvent.ACTION_MOVE:
-                // Reset touch inputs
-                touchDirection = null;
-                touchStunt = null;
+                // Don't reset touch inputs here, check each button individually
                 
-                // Update button states based on touch position
-                leftButton.setPressed(leftButton.isPressed(x, y));
-                if (leftButton.isPressed()) {
-                    touchDirection = "left";
-                }
+                // Check each button and update state
+                boolean anyButtonPressed = false;
                 
-                rightButton.setPressed(rightButton.isPressed(x, y));
-                if (rightButton.isPressed()) {
+                if (rightButton.isPressed(x, y)) {
+                    rightButton.setPressed(true);
                     touchDirection = "right";
+                    anyButtonPressed = true;
+                } else {
+                    rightButton.setPressed(false);
                 }
                 
-                upButton.setPressed(upButton.isPressed(x, y));
-                if (upButton.isPressed()) {
+                if (!anyButtonPressed && leftButton.isPressed(x, y)) {
+                    leftButton.setPressed(true);
+                    touchDirection = "left";
+                    anyButtonPressed = true;
+                } else {
+                    leftButton.setPressed(false);
+                }
+                
+                if (!anyButtonPressed && upButton.isPressed(x, y)) {
+                    upButton.setPressed(true);
                     touchDirection = "up";
+                    anyButtonPressed = true;
+                } else {
+                    upButton.setPressed(false);
                 }
                 
-                downButton.setPressed(downButton.isPressed(x, y));
-                if (downButton.isPressed()) {
+                if (!anyButtonPressed && downButton.isPressed(x, y)) {
+                    downButton.setPressed(true);
                     touchDirection = "down";
+                    anyButtonPressed = true;
+                } else {
+                    downButton.setPressed(false);
                 }
                 
-                wheelieButton.setPressed(wheelieButton.isPressed(x, y));
-                if (wheelieButton.isPressed()) {
+                if (wheelieButton.isPressed(x, y)) {
+                    wheelieButton.setPressed(true);
                     touchStunt = "wheelie";
+                } else {
+                    wheelieButton.setPressed(false);
                 }
                 
-                jumpButton.setPressed(jumpButton.isPressed(x, y));
-                if (jumpButton.isPressed()) {
+                if (jumpButton.isPressed(x, y)) {
+                    jumpButton.setPressed(true);
                     touchStunt = "jump";
+                } else {
+                    jumpButton.setPressed(false);
                 }
+                
+                // If no button is pressed, reset touch inputs
+                if (!anyButtonPressed && touchDirection != null) {
+                    touchDirection = null;
+                }
+                
                 break;
                 
             case MotionEvent.ACTION_UP:
@@ -409,6 +462,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         
         // Reset player
         player = new Player(bikeNormalImg, bikeWheelieImg, bikeJumpImg, screenWidth, screenHeight);
+        
+        // Set effect images for player
+        player.setEffectImages(speedLinesImg, dustImg, stuntStarsImg);
         
         // Reset obstacles
         obstacles.clear();
@@ -510,7 +566,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             // Draw finish line if it's visible on screen
             int finishLineScreenY = finishLineY + distance;
             if (-50 <= finishLineScreenY && finishLineScreenY <= screenHeight) {
-                canvas.drawBitmap(finishLineImg, 150, finishLineScreenY, null);
+                canvas.drawBitmap(finishLineImg, player.getRoadLeftBoundary(), finishLineScreenY, null);
             }
             
             // Draw obstacles
@@ -529,6 +585,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             // Draw score and distance
             canvas.drawText("Score: " + score, 10, 50, textPaint);
             canvas.drawText("Distance: " + distance + "m", 10, 100, textPaint);
+            
+            // Debug information
+            canvas.drawText("Bike X: " + player.getX() + ", Width: " + player.getWidth() + ", Right: " + (player.getX() + player.getWidth()), 10, 150, textPaint);
+            canvas.drawText("Road: " + player.getRoadLeftBoundary() + "-" + player.getRoadRightBoundary(), 10, 200, textPaint);
+            canvas.drawText("Direction: " + (touchDirection != null ? touchDirection : "none"), 10, 250, textPaint);
             
             // Draw stunt info
             if (player.isPerformingStunt()) {
@@ -561,13 +622,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 wheelieButton.draw(canvas);
                 jumpButton.draw(canvas);
                 
+                // Draw reset button
+                resetButton.draw(canvas);
+                
                 // Draw small control hints
                 Paint hintPaint = new Paint(textPaint);
                 hintPaint.setTextSize(18);
-                canvas.drawText("Wheelie", wheelieButton.getX() + wheelieButton.getWidth() / 2 - 30, 
+                canvas.drawText("Wheelie", wheelieButton.getX() + wheelieButton.getWidth() / 2 - 30,
                         wheelieButton.getY() - 10, hintPaint);
-                canvas.drawText("Jump", jumpButton.getX() + jumpButton.getWidth() / 2 - 20, 
+                canvas.drawText("Jump", jumpButton.getX() + jumpButton.getWidth() / 2 - 20,
                         jumpButton.getY() - 10, hintPaint);
+                canvas.drawText("Reset Position", resetButton.getX() + resetButton.getWidth() / 2 - 50,
+                        resetButton.getY() - 10, hintPaint);
             }
             
             // Draw game over message if game is over

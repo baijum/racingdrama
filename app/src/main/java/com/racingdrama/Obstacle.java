@@ -17,6 +17,10 @@ public class Obstacle {
     private int y;
     private int speed;
     
+    // Road boundaries
+    private int roadLeftBoundary;
+    private int roadRightBoundary;
+    
     // Collision detection
     private Rect collisionRect;
     
@@ -27,7 +31,7 @@ public class Obstacle {
     // Random generator
     private Random random;
     
-    public Obstacle(Bitmap image, int x, int y, int speed, String obstacleType, boolean isHazard) {
+    public Obstacle(Bitmap image, int x, int y, int speed, String obstacleType, boolean isHazard, int roadLeftBoundary, int roadRightBoundary) {
         this.image = image;
         this.width = image.getWidth();
         this.height = image.getHeight();
@@ -36,6 +40,8 @@ public class Obstacle {
         this.speed = speed;
         this.obstacleType = obstacleType;
         this.isHazard = isHazard;
+        this.roadLeftBoundary = roadLeftBoundary;
+        this.roadRightBoundary = roadRightBoundary;
         
         // Initialize collision rectangle
         this.collisionRect = new Rect(x, y, x + width, y + height);
@@ -60,7 +66,14 @@ public class Obstacle {
     private void resetObstacle(int screenWidth) {
         // Reset position above the screen
         y = random.nextInt(200) - 250;
-        x = random.nextInt(500) + 150;  // Keep within road boundaries (150-650)
+        
+        // Ensure obstacles stay completely within road boundaries
+        // Account for obstacle width to prevent it from extending beyond road edges
+        int maxX = roadRightBoundary - width;
+        int minX = roadLeftBoundary;
+        
+        // Generate random x position within safe road boundaries
+        x = random.nextInt(maxX - minX) + minX;
     }
     
     public void draw(Canvas canvas) {
